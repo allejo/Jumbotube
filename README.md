@@ -9,7 +9,9 @@ jQuery Jumbotube is a fork of the [tubular](https://github.com/mccambridge/tubul
 ## Usage
 
 1. Load jQuery on your web page if you haven't already. Preferably use jQuery from a CDN such as [Google's Hosted Libraries](https://developers.google.com/speed/libraries/) or [jQuery's CDN](https://code.jquery.com/).
+
 2. After jQuery has been loaded, load the `jquery.jumbotube.js` plug-in
+
 3. Use the Jumbotube
 
   ```
