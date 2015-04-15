@@ -16,7 +16,7 @@ jQuery Jumbotube is a fork of the [tubular](https://github.com/mccambridge/tubul
 
   ```
   $('#tubular').jumbotube({
-     videoId: 'I_QsCXm1vrk'
+     videoID: 'I_QsCXm1vrk'
   });
   ```
 
