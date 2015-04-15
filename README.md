@@ -22,51 +22,54 @@ jQuery Jumbotube is a fork of the [tubular](https://github.com/mccambridge/tubul
 
 ### Configuration Options
 
-- ratio
+- **ratio**
 	- Default: 16 / 9
 	- Description: The ratio for the video size. Typically 16/9 or 4/3
-- videoId
+- **videoID**
 	- Default: 'ZCAnLxRvNNc'
 	- Description: The ID of the YouTube video
-- mute
+- **mute**
 	- Default: true
 	- Description: Whether or not to have the video be muted
-- repeat
+- **repeat**
 	- Default: true
 	- Description: Whether or not to repeat the video when it ends
-- width
+- **width**
 	- Default: $(window).width()
 	- Description: The width that the video will take up
-- wrapperZIndex
+- **wrapperZIndex**
 	- Default: 99
 	- Description: The z-index the Jumbotube video will take
-- playButtonClass
+- **playButtonClass**
 	- Default: 'tubular-play'
 	- Description: The class that will be listened for in order to play a Jumbotube video
-- pauseButtonClass
+- **pauseButtonClass**
 	- Default: 'tubular-pause'
 	- Description: The class that will be listened for in order to pause a Jumbotube video
-- muteButtonClass
+- **muteButtonClass**
 	- Default: 'tubular-mute'
 	- Description: The class that will be listened for in order to mute a Jumbotube video
-- volumeUpClass
+- **volumeUpClass**
 	- Default: 'tubular-volume-up'
 	- Description: The class that will be listened for in order to raise the volume of a Jumbotube video
-- volumeDownClass
+- **volumeDownClass**
 	- Default: 'tubular-volume-down'
 	- Description: The class that will be listened for in order to lower the volume of a Jumbotube video
-- volumeChangeFactor
+- **volumeChangeFactor**
 	- Default: 10
 	- Description: The amount the volume will be increased/decreased by when `tubular-volume-up` or `tubular-volume-down` are clicked, respectively
-- start
+- **start**
 	- Default: 0
 	- Description: The time, in seconds, the video should start at
-- videoQuality
+- **end**
+	- Default: -1
+	- Description: The time, in seconds, the video should "end" at. If **repeat** is set to true, the video will loop back, otherwise the video will simply just pause at the given time
+- **videoQuality**
 	- Default: 'hd1080'
 	- Description: The default video quality for the video
-- relatedVideos
+- **relatedVideos**
 	- Default: 0
 	- Description: Display related videos when the video is finished playing
-- onApiReady
+- **onApiReady**
 	- Default: function () {}
 	- Description: A function that will be called inside of onYouTubeIframeAPIReady(). Because this plug-in automatically loads the YouTube JS API, it'll cause conflicts with trying to override onYouTubeIframeAPIReady() for your own YouTube videos.

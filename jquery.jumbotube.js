@@ -1,4 +1,4 @@
-// Copyright (c) 2010 Sean McCambridge | http://www.seanmccambridge.com/tubular
+﻿// Copyright (c) 2010 Sean McCambridge | http://www.seanmccambridge.com/tubular
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
     // Default configuration options
     var defaults = {
         ratio: 16 / 9, // usually either 4/3 or 16/9 -- tweak as needed
-        videoId: 'ZCAnLxRvNNc', // toy robot in space is a good default, no?
+        videoID: 'ZCAnLxRvNNc', // toy robot in space is a good default, no?
         mute: true,
         repeat: true,
         width: $(window).width(),
@@ -33,8 +33,9 @@
         muteButtonClass: 'tubular-mute',
         volumeUpClass: 'tubular-volume-up',
         volumeDownClass: 'tubular-volume-down',
-        increaseVolumeBy: 10,
+        volumeChangeFactor: 10,
         start: 0,
+        end: -1,
         videoQuality: 'hd1080',
         relatedVideos: 0,
         onApiReady: function () {}
@@ -44,6 +45,7 @@
 
     var jumbotube = function (node, passedOptions) { // should be called on the wrapper div
         var options = $.extend({}, defaults, passedOptions),
+            playTimer = null, // the timeout ID for auto-pausing
             $body = $('body'), // cache body node
             $node = $(node); // cache wrapper node
 
@@ -61,7 +63,7 @@
             JumboPlayer = new YT.Player('tubular-player', {
                 width: options.width,
                 height: Math.ceil(options.width / options.ratio),
-                videoId: options.videoId,
+                videoId: options.videoID,
                 playerVars: {
                     controls: 0,
                     showinfo: 0,
@@ -93,6 +95,26 @@
         window.onJumboPlayerStateChange = function (state) {
             if (state.data === 0 && options.repeat) { // video ended and repeat option is set true
                 JumboPlayer.seekTo(options.start); // restart
+            }
+
+            if (state.data == YT.PlayerState.PLAYING && options.end > 0) {
+                clearTimeout(playTimer);
+
+                var time = JumboPlayer.getCurrentTime();
+
+                if (time < options.end) {
+                    var rate = JumboPlayer.getPlaybackRate();
+                    var remainingTime = (options.end - time) / rate;
+
+                    playTimer = setTimeout(function () {
+                        if (options.repeat) {
+                            JumboPlayer.seekTo(options.start);
+                        }
+                        else {
+                            JumboPlayer.pauseVideo();
+                        }
+                    }, remainingTime * 1000);
+                }
             }
         };
 
@@ -154,11 +176,11 @@
 
             var currentVolume = JumboPlayer.getVolume();
 
-            if (currentVolume < options.increaseVolumeBy) {
-                currentVolume = options.increaseVolumeBy;
+            if (currentVolume < options.volumeChangeFactor) {
+                currentVolume = options.volumeChangeFactor;
             }
 
-            JumboPlayer.setVolume(currentVolume - options.increaseVolumeBy);
+            JumboPlayer.setVolume(currentVolume - options.volumeChangeFactor);
         });
 
         // Volume up
@@ -172,11 +194,11 @@
 
             var currentVolume = JumboPlayer.getVolume();
 
-            if (currentVolume > 100 - options.increaseVolumeBy) {
-                currentVolume = 100 - options.increaseVolumeBy;
+            if (currentVolume > 100 - options.volumeChangeFactor) {
+                currentVolume = 100 - options.volumeChangeFactor;
             }
 
-            JumboPlayer.setVolume(currentVolume + options.increaseVolumeBy);
+            JumboPlayer.setVolume(currentVolume + options.volumeChangeFactor);
         });
     };
 
