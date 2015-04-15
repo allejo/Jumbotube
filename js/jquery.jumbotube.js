@@ -1,22 +1,28 @@
-/* jQuery tubular plugin
-|* by Sean McCambridge
-|* http://www.seanmccambridge.com/tubular
-|* version: 1.0
-|* updated: October 1, 2012
-|* since 2010
-|* licensed under the MIT License
-|* Enjoy.
-|* 
-|* Thanks,
-|* Sean */
+// Copyright (c) 2010 Sean McCambridge | http://www.seanmccambridge.com/tubular
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
-;(function ($, window) {
+; (function ($, window) {
 
-    // test for feature support and return if failure
-    
-    // defaults
+    // Default configuration options
     var defaults = {
-        ratio: 16/9, // usually either 4/3 or 16/9 -- tweak as needed
+        ratio: 16 / 9, // usually either 4/3 or 16/9 -- tweak as needed
         videoId: 'ZCAnLxRvNNc', // toy robot in space is a good default, no?
         mute: true,
         repeat: true,
@@ -30,28 +36,29 @@
         increaseVolumeBy: 10,
         start: 0,
         videoQuality: 'hd1080',
-        relatedVideos: 0
+        relatedVideos: 0,
+        onApiReady: function () {}
     };
 
     // methods
 
-    var tubular = function(node, options) { // should be called on the wrapper div
-        var options = $.extend({}, defaults, options),
-            $body = $('body') // cache body node
+    var jumbotube = function (node, passedOptions) { // should be called on the wrapper div
+        var options = $.extend({}, defaults, passedOptions),
+            $body = $('body'), // cache body node
             $node = $(node); // cache wrapper node
 
         // build container
-        var tubularContainer = '<div id="tubular-container" style="overflow: hidden; position: fixed; z-index: 1; width: 100%; height: 100%"><div id="tubular-player" style="position: absolute"></div></div><div id="tubular-shield" style="width: 100%; height: 100%; z-index: 2; position: absolute; left: 0; top: 0;"></div>';
+        var jumbotubeContainer = '<div id="tubular-container" style="overflow: hidden; position: fixed; z-index: 1; width: 100%; height: 100%"><div id="tubular-player" style="position: absolute"></div></div><div id="tubular-shield" style="width: 100%; height: 100%; z-index: 2; position: absolute; left: 0; top: 0;"></div>';
 
         // set up css prereq's, inject tubular container and set up wrapper defaults
-        $('html,body').css({'width': '100%', 'height': '100%'});
-        $body.prepend(tubularContainer);
-        $node.css({position: 'relative', 'z-index': options.wrapperZIndex});
+        $('html,body').css({ 'width': '100%', 'height': '100%' });
+        $body.prepend(jumbotubeContainer);
+        $node.css({ position: 'relative', 'z-index': options.wrapperZIndex });
 
         // set up iframe player, use global scope so YT api can talk
-        window.player;
-        window.onYouTubeIframeAPIReady = function() {
-            player = new YT.Player('tubular-player', {
+        window.JumboPlayer = null;
+        window.onYouTubeIframeAPIReady = function () {
+            JumboPlayer = new YT.Player('tubular-player', {
                 width: options.width,
                 height: Math.ceil(options.width / options.ratio),
                 videoId: options.videoId,
@@ -64,27 +71,33 @@
                     rel: options.relatedVideos
                 },
                 events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
+                    'onReady': onJumboPlayerReady,
+                    'onStateChange': onJumboPlayerStateChange
                 }
             });
-        }
 
-        window.onPlayerReady = function(e) {
+            options.onApiReady();
+        };
+
+        window.onJumboPlayerReady = function (e) {
             resize();
-            if (options.mute) e.target.mute();
+
+            if (options.mute) {
+                e.target.mute();
+            }
+
             e.target.seekTo(options.start);
             e.target.playVideo();
-        }
+        };
 
-        window.onPlayerStateChange = function(state) {
+        window.onJumboPlayerStateChange = function (state) {
             if (state.data === 0 && options.repeat) { // video ended and repeat option is set true
-                player.seekTo(options.start); // restart
+                JumboPlayer.seekTo(options.start); // restart
             }
-        }
+        };
 
         // resize handler updates width, height and offset of player after resize/init
-        var resize = function() {
+        var resize = function () {
             var width = $(window).width(),
                 pWidth, // player width, to be defined
                 height = $(window).height(),
@@ -95,58 +108,94 @@
 
             if (width / options.ratio < height) { // if new video height < window height (gap underneath)
                 pWidth = Math.ceil(height * options.ratio); // get new player width
-                $tubularPlayer.width(pWidth).height(height).css({left: (width - pWidth) / 2, top: 0}); // player width is greater, offset left; reset top
+                $tubularPlayer.width(pWidth).height(height).css({ left: (width - pWidth) / 2, top: 0 }); // player width is greater, offset left; reset top
             } else { // new video width < window width (gap to right)
                 pHeight = Math.ceil(width / options.ratio); // get new player height
-                $tubularPlayer.width(width).height(pHeight).css({left: 0, top: (height - pHeight) / 2}); // player height is greater, offset top; reset left
+                $tubularPlayer.width(width).height(pHeight).css({ left: 0, top: (height - pHeight) / 2 }); // player height is greater, offset top; reset left
             }
-
-        }
+        };
 
         // events
-        $(window).on('resize.tubular', function() {
+        $(window).on('resize.jumbotube', function () {
             resize();
-        })
+        });
 
-        $('body').on('click','.' + options.playButtonClass, function(e) { // play button
-            e.preventDefault();
-            player.playVideo();
-        }).on('click', '.' + options.pauseButtonClass, function(e) { // pause button
-            e.preventDefault();
-            player.pauseVideo();
-        }).on('click', '.' + options.muteButtonClass, function(e) { // mute button
-            e.preventDefault();
-            (player.isMuted()) ? player.unMute() : player.mute();
-        }).on('click', '.' + options.volumeDownClass, function(e) { // volume down button
-            e.preventDefault();
-            var currentVolume = player.getVolume();
-            if (currentVolume < options.increaseVolumeBy) currentVolume = options.increaseVolumeBy;
-            player.setVolume(currentVolume - options.increaseVolumeBy);
-        }).on('click', '.' + options.volumeUpClass, function(e) { // volume up button
-            e.preventDefault();
-            if (player.isMuted()) player.unMute(); // if mute is on, unmute
-            var currentVolume = player.getVolume();
-            if (currentVolume > 100 - options.increaseVolumeBy) currentVolume = 100 - options.increaseVolumeBy;
-            player.setVolume(currentVolume + options.increaseVolumeBy);
-        })
-    }
+        //
+        // Watch and support button clicks
+        //
 
-    // load yt iframe js api
+        // Play button
+        $('.' + options.playButtonClass).click(function (e) {
+            e.preventDefault();
+            JumboPlayer.playVideo();
+        });
+
+        // Pause button
+        $('.' + options.pauseButtonClass).click(function (e) {
+            e.preventDefault();
+            JumboPlayer.pauseVideo();
+        });
+
+        // Sound button
+        $('.' + options.muteButtonClass).click(function (e) {
+            e.preventDefault();
+
+            if (JumboPlayer.isMuted()) {
+                JumboPlayer.unMute();
+            }
+            else {
+                JumboPlayer.mute();
+            }
+        });
+
+        // Volume down
+        $('.' + options.volumeDownClass).click(function (e) {
+            e.preventDefault();
+
+            var currentVolume = JumboPlayer.getVolume();
+
+            if (currentVolume < options.increaseVolumeBy) {
+                currentVolume = options.increaseVolumeBy;
+            }
+
+            JumboPlayer.setVolume(currentVolume - options.increaseVolumeBy);
+        });
+
+        // Volume up
+        $('.' + options.volumeUpClass).click(function (e) {
+            e.preventDefault();
+
+            // If the video is muted, then unmute it
+            if (JumboPlayer.isMuted()) {
+                JumboPlayer.unMute();
+            }
+
+            var currentVolume = JumboPlayer.getVolume();
+
+            if (currentVolume > 100 - options.increaseVolumeBy) {
+                currentVolume = 100 - options.increaseVolumeBy;
+            }
+
+            JumboPlayer.setVolume(currentVolume + options.increaseVolumeBy);
+        });
+    };
+
+    // Load YouTube's JS API to interact with YouTube videos
 
     var tag = document.createElement('script');
     tag.src = "//www.youtube.com/iframe_api";
     var firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    // create plugin
+    // Create the plugin
 
-    $.fn.tubular = function (options) {
+    $.fn.jumbotube = function (options) {
         return this.each(function () {
             if (!$.data(this, 'tubular_instantiated')) { // let's only run one
-                $.data(this, 'tubular_instantiated', 
-                tubular(this, options));
+                $.data(this, 'tubular_instantiated',
+                jumbotube(this, options));
             }
         });
-    }
+    };
 
 })(jQuery, window);
