@@ -93,11 +93,10 @@
         };
 
         window.onJumboPlayerStateChange = function (state) {
-            if (state.data === 0 && options.repeat) { // video ended and repeat option is set true
+            if (state.data === YT.PlayerState.ENDED && options.repeat) { // video ended and repeat option is set true
                 JumboPlayer.seekTo(options.start); // restart
             }
-
-            if (state.data == YT.PlayerState.PLAYING && options.end > 0) {
+            else if (state.data === YT.PlayerState.PLAYING && options.end > 0) {
                 clearTimeout(playTimer);
 
                 var time = JumboPlayer.getCurrentTime();
