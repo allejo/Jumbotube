@@ -1,0 +1,29 @@
+﻿.jumbotube-container {
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    z-index: 1;
+}
+
+.jumbotube-player {
+    position: absolute;
+}
+
+.jumbotube-shield {
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+.jumbotube-placeholder {
+    display: none;
+
+    position: absolute;
+    top: -176px;
+    width: 100%;
+    z-index: 3;
+}
