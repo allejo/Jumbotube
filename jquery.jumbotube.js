@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+var JumboPlayer;
+
 ; (function ($, window) {
 
     // Default configuration options
@@ -58,7 +60,6 @@
         $node.css({ position: 'relative', 'z-index': options.wrapperZIndex });
 
         // set up iframe player, use global scope so YT api can talk
-        window.JumboPlayer = null;
         window.onYouTubeIframeAPIReady = function () {
             JumboPlayer = new YT.Player('jumbotube-player', {
                 width: options.width,
@@ -81,7 +82,7 @@
             options.onApiReady();
         };
 
-        window.onJumboPlayerReady = function (e) {
+        var onJumboPlayerReady = function (e) {
             resize();
 
             if (options.mute) {
@@ -92,7 +93,7 @@
             e.target.playVideo();
         };
 
-        window.onJumboPlayerStateChange = function (state) {
+        var onJumboPlayerStateChange = function (state) {
             if (state.data === YT.PlayerState.ENDED && options.repeat) { // video ended and repeat option is set true
                 JumboPlayer.seekTo(options.start); // restart
             }
